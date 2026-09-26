@@ -10,6 +10,24 @@ class E2EWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
 
+        # Ensure demo user exists for headless CI environments
+        from app.database import SessionLocal
+        from app import models, auth
+
+        db = SessionLocal()
+        try:
+            if not db.query(models.User).filter(models.User.email == "officer@sih.gov.in").first():
+                officer = models.User(
+                    full_name="Procurement Officer",
+                    email="officer@sih.gov.in",
+                    hashed_password=auth.hash_password("ByteBusters@2026"),
+                    role=models.UserRole.admin,
+                )
+                db.add(officer)
+                db.commit()
+        finally:
+            db.close()
+
         # Login to obtain JWT bearer token
         login_res = self.client.post(
             "/api/auth/login",
@@ -19,6 +37,7 @@ class E2EWorkflowTests(unittest.TestCase):
         token_data = login_res.json()
         self.token = token_data["access_token"]
         self.headers = {"Authorization": f"Bearer {self.token}"}
+
 
     def test_unauthorized_access_rejected(self):
         res = self.client.get("/api/tenders")
