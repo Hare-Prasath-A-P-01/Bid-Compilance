@@ -1,0 +1,15 @@
+ACME TECH SOLUTIONS PRIVATE LIMITED
+TECHNICAL BID & ARCHITECTURAL PROPOSAL
+Tender Ref: SIH26100-DEMO - Supply of IT Equipment
+
+Section 1: Executive Technical Proposal
+We hereby submit our comprehensive technical bid for the supply, installation, and commissioning of high-performance server clusters, workstation units, and managed switches.
+
+Section 2: Hardware Specifications Compliance
+1. Rack-mountable enterprise compute nodes with dual 64-core processors.
+2. 512 GB DDR5 ECC Memory per node.
+3. Redundant hot-swappable 80-Plus Platinum power supplies.
+4. 10 GbE SFP+ optical uplink network interfaces.
+
+Section 3: Quality Assurance & Warranty
+All items meet OEM quality benchmarks with 3-year 24x7 comprehensive onsite warranty support.

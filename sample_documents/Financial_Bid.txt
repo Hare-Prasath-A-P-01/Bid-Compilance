@@ -1,0 +1,16 @@
+ACME TECH SOLUTIONS PRIVATE LIMITED
+COMMERCIAL QUOTATION / FINANCIAL BID DOCUMENT
+Tender Ref: SIH26100-DEMO
+
+Bill of Quantities (BOQ) & Price Bid Summary:
+
+Item 1: Enterprise Compute Server Units (Qty: 10) - INR 45,00,000
+Item 2: Core Network Switch 48-port PoE+ (Qty: 4) - INR 12,00,000
+Item 3: High-Performance Workstation Terminals (Qty: 25) - INR 25,00,000
+Item 4: Installation, Configuration & Commissioning - INR 5,00,000
+
+Sub-Total: INR 87,00,000
+Applicable GST (18%): INR 15,66,000
+Grand Total Price Quotation: INR 1,02,66,000 (Inclusive of all duties, freight, and taxes)
+
+Price bid validity: 180 days from tender closing date.

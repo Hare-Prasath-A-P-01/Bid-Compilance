@@ -1,0 +1,20 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/*.py[cod]
+
+# Local runtime data
+backend/bidcompliance.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/
+
+# Local environment files
+backend/.env
+.env
+
+# Database backups
+backups/
