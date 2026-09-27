@@ -39,11 +39,11 @@ services:
     staticPublishPath: dist
     routes:
       - type: rewrite
+        source: /api/*
+        destination: https://bid-compliance-api.onrender.com/api/*
+      - type: rewrite
         source: /*
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: bid-compliance-api
-          property: host
+        value: https://bid-compliance-api.onrender.com

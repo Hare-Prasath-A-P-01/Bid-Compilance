@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 let apiHost = import.meta.env.VITE_API_URL || ''
-if (apiHost && !apiHost.startsWith('http://') && !apiHost.startsWith('https://')) {
+if (apiHost === 'bid-compliance-api' || (apiHost && !apiHost.includes('.') && !apiHost.includes('localhost'))) {
+  apiHost = 'https://bid-compliance-api.onrender.com'
+} else if (apiHost && !apiHost.startsWith('http://') && !apiHost.startsWith('https://')) {
   apiHost = `https://${apiHost}`
 }
 const apiBase = apiHost ? `${apiHost.replace(/\/+$/, '')}/api` : '/api'
