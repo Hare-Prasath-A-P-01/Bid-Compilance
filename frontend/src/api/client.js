@@ -1,6 +1,14 @@
 import axios from 'axios'
 
-const client = axios.create({ baseURL: '/api' })
+let apiHost = import.meta.env.VITE_API_URL || ''
+if (apiHost && !apiHost.startsWith('http://') && !apiHost.startsWith('https://')) {
+  apiHost = `https://${apiHost}`
+}
+const apiBase = apiHost ? `${apiHost.replace(/\/+$/, '')}/api` : '/api'
+
+const client = axios.create({ baseURL: apiBase })
+
+
 
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('bbc_token')
