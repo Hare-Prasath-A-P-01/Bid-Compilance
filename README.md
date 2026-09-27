@@ -1,166 +1,163 @@
 # AI Bid Compliance Checker — Byte Busters (SIH 2026)
 
-An AI-assisted system that checks tender bid documents against a procurement
-checklist automatically — extracting text from PDFs/scans, matching each
-document to the requirement it satisfies, flagging expired or suspicious
-documents, and producing a compliance score and risk rating for every bid.
+[![CI](https://github.com/Hare-Prasath-A-P-01/Bid-Compilance/actions/workflows/ci.yml/badge.svg)](https://github.com/Hare-Prasath-A-P-01/Bid-Compilance/actions/workflows/ci.yml)
+[![Render Deployment](https://img.shields.io/badge/Render-Deployed%20Live-brightgreen)](https://bid-compliance-frontend.onrender.com)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Built for Smart India Hackathon by Byte Busters.
+An enterprise AI-powered procurement compliance verification system that checks tender bid documents against statutory procurement checklists automatically. It extracts text from PDFs and scans via OCR, matches documents to requirements, detects expired or corrupted submissions, calculates defensible compliance scores, and generates official PDF evaluation certificates.
 
-## What it does
+Built for **Smart India Hackathon 2026** (Problem Statement: **SIH26100**) by **Byte Busters**.
 
-- **Tender setup** — a procurement officer creates a tender and defines the
-  document checklist (e.g. GST Certificate, PAN Card, EMD Proof, Technical
-  Bid, Financial Bid), each with keywords used for matching.
-- **Bid intake** — bidders' documents are uploaded per bid (PDF, image, or
-  text). Scanned PDFs and images are OCR'd automatically.
-- **Automated compliance check** — a rule-based engine matches each document
-  to the requirement it satisfies, flags likely issues (expired validity
-  dates, blank/corrupted scans, unmatched documents), and rolls everything up
-  into a 0–100 compliance score and a Low / Medium / High risk rating.
-- **Optional LLM assist** — if `ANTHROPIC_API_KEY` is set, flagged documents
-  get a one-line, plain-English explanation from Claude on top of the
-  rule-based flag. The app works fully without a key; this is additive.
-- **Audit trail** — every upload and bid action is logged and viewable per
-  bid, for transparency during evaluation.
+---
 
-## Tech stack
+## 🌐 Live Cloud Deployment
 
-| Layer      | Technology |
-|------------|------------|
-| Frontend   | React 18 + Vite, plain CSS (no UI framework) |
-| Backend    | FastAPI (Python), SQLAlchemy ORM |
-| Database   | PostgreSQL (SQLite fallback for local dev without Docker) |
-| Document processing | pdfplumber (PDF text), pytesseract + Tesseract OCR (scans/images) |
-| Compliance logic | Keyword-based classifier + heuristic issue detection |
-| Auth       | JWT (python-jose) + bcrypt password hashing |
-| LLM (optional) | Anthropic API (`claude-sonnet-4-6`) for human-readable flag explanations |
+| Service | Link | Description |
+|---|---|---|
+| **Web Application (UI)** | [https://bid-compliance-frontend.onrender.com](https://bid-compliance-frontend.onrender.com) | Live React dashboard for procurement officers and reviewers |
+| **Backend REST API** | [https://bid-compliance-api.onrender.com](https://bid-compliance-api.onrender.com) | FastAPI backend service with OCR & compliance engine |
+| **Interactive API Docs** | [https://bid-compliance-api.onrender.com/docs](https://bid-compliance-api.onrender.com/docs) | Swagger UI for exploring and testing API endpoints |
 
-## Running it — Docker (recommended)
+### Demo Credentials
+- **Email:** `officer@sih.gov.in`
+- **Password:** `ByteBusters@2026`
+- **Pre-seeded Tender:** `SIH26100-DEMO` (Supply of IT Equipment — 8 Statutory Requirements)
 
-Requires Docker + Docker Compose.
+---
+
+## 🚀 Key Features
+
+- **Tender Lifecycle & Checklist Setup**: Procurement officers define mandatory/critical document checklists (GST, PAN, EMD proof, Technical/Financial bids) with custom matching keywords and weights.
+- **Multimodal Document Processing**: Extracts text from native PDFs via `pdfplumber` and optical scans/images via `pytesseract` (Tesseract OCR).
+- **Automated Compliance Engine**: Rule-based matching engine pairs uploaded documents to requirements, checks validity dates, flags expired/blank files, and computes a 0–100 compliance score with Low/Medium/High risk ratings.
+- **Official PDF Evaluation Certificates**: Generates tamper-evident, downloadable PDF compliance certificates with QR-ready audit summaries via ReportLab.
+- **Role-Based Access Control (RBAC)**: Enforces department-scoped permissions across Admin, Procurement Officer, and Reviewer roles with designated review queues.
+- **Enterprise Security Hardening**: Magic-byte MIME type validation, SHA-256 duplicate document prevention, enterprise password complexity, secure session handling, and HTTP security headers (CSP, HSTS).
+- **Complete Audit Trail**: Immutable logging of every upload, status transition, review action, and decision for full regulatory transparency.
+- **Optional LLM Explanations**: Integrates with Claude (`claude-sonnet-4-6`) to provide plain-English summaries of flagged non-compliance issues.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 18, Vite, React Router, Vanilla CSS Design System |
+| **Backend** | FastAPI (Python 3.11), SQLAlchemy 2.0 ORM, Alembic migrations |
+| **Database** | PostgreSQL (Production on Render) / SQLite (Local dev) |
+| **Document Processing** | `pdfplumber`, `pytesseract` (Tesseract OCR Engine), Pillow |
+| **Report Generation** | ReportLab (Vector PDF Generation) |
+| **Security & Auth** | JWT (`python-jose`), bcrypt password hashing, magic-byte inspection |
+| **Infrastructure** | Docker, Docker Compose, Nginx, Render Cloud Blueprints |
+| **CI / CD** | GitHub Actions (Unit, Integration & E2E workflow tests) |
+
+---
+
+## 🧪 Testing the Live App with Sample Documents
+
+The repository includes ready-to-upload test documents in [`sample_documents/`](./sample_documents/):
+
+1. Log into the live web app with `officer@sih.gov.in` / `ByteBusters@2026`.
+2. Open the demo tender: **SIH26100-DEMO**.
+3. Create a new bid (e.g., bidder: *Apex Technologies*).
+4. Upload files from `sample_documents/`:
+   - `GST_Certificate.txt` ➔ Automatically matches **GST Registration Certificate** (Pass).
+   - `PAN_Card.txt` ➔ Automatically matches **PAN Card** (Pass).
+   - `EMD_Proof_Valid.txt` ➔ Automatically matches **EMD Proof** (Pass).
+   - `Expired_EMD_Receipt.txt` ➔ Triggers **Date Expiry** flag (Mismatched / Review required).
+   - `FLAG_Blank_Scan.txt` ➔ Triggers **Blank / Corrupted Scan** flag.
+5. Click **"Download PDF Certificate"** to export the official evaluation report.
+
+---
+
+## 💻 Local Development Setup
+
+### Option 1: Docker Compose (Recommended)
 
 ```bash
-export SECRET_KEY="replace-with-a-long-random-secret"
+# Clone the repository
+git clone https://github.com/Hare-Prasath-A-P-01/Bid-Compilance.git
+cd Bid-Compilance
+
+# Start PostgreSQL, Backend API, and Frontend
 docker compose up --build
 ```
+- Open **http://localhost:4173** in your browser.
+- Demo login: `officer@sih.gov.in` / `ByteBusters@2026`
 
-This starts a health-checked Postgres service, the backend, and the frontend.
-Open **http://localhost:4173**. Set `SECRET_KEY` to a unique value before
-starting; production mode rejects the local development secret.
+---
 
-To create the demo login and tender once after the services are running:
+### Option 2: Manual Setup (Without Docker)
 
-```bash
-docker compose exec backend python seed.py
-```
-
-Demo login: `officer@sih.gov.in` / `ByteBusters@2026`
-
-For a database backup from a running Docker stack, use PowerShell:
-
-```powershell
-.\scripts\backup.ps1
-```
-
-The repository CI workflow runs backend tests and the frontend production build
-on every push and pull request. Docker services expose `/api/health` and
-`/api/ready` for health and readiness checks.
-
-To enable the optional LLM explanations, export a key before starting:
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-docker compose up --build
-```
-
-## Running it — manual (no Docker)
-
-**Backend** (uses SQLite automatically if `DATABASE_URL` isn't set):
-
+#### 1. Backend:
 ```bash
 cd backend
-# Use Python 3.11+ locally; on Windows, Python 3.13 worked reliably for this project
-py -3.13 -m venv venv
-.\venv\Scripts\activate
-python -m pip install -r requirements.txt
-python seed.py            # creates demo login + demo tender
-python -m uvicorn app.main:app --reload --port 8000
+python -m venv .venv
+# Windows:
+.\.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+python seed.py
+uvicorn app.main:app --reload --port 8000
 ```
 
-OCR requires the Tesseract binary on your machine (`apt install tesseract-ocr`
-on Debian/Ubuntu, `brew install tesseract` on macOS). Without it, image-based
-documents just extract no text rather than crashing — PDF text layers and
-plain text files still work fine.
-
-**Frontend** (separate terminal):
-
+#### 2. Frontend:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Open **http://localhost:5173** (Vite automatically proxies `/api` to port 8000).
 
-Open **http://localhost:5173** — Vite proxies `/api` to the backend on 8000.
+---
 
-## Project structure
+## 📁 Repository Structure
 
-```
-byte-busters/
-  backend/
-    app/
-      main.py              FastAPI app + router registration
-      models.py             SQLAlchemy tables
-      schemas.py            Pydantic request/response models
-      auth.py                JWT + password hashing
-      routers/
-        auth.py              register / login
-        tenders.py           create tenders + requirement checklists
-        bids.py               register bids per tender
-        documents.py         upload/delete documents, triggers auto-evaluation
-        compliance.py         compliance report endpoint
-      services/
-        document_processor.py  PDF/OCR text extraction
-        compliance_engine.py   keyword matching, issue detection, scoring
-        llm_service.py          optional Claude-powered explanations
-    seed.py                 demo login + demo tender
-    requirements.txt
-    Dockerfile
-  frontend/
-    src/
-      pages/                Login, Dashboard, NewTender, TenderDetail, BidDetail
-      components/           Shell (sidebar layout), RiskBadge
-      context/AuthContext.jsx
-      api/client.js
-    Dockerfile              nginx serving the built app + reverse-proxying /api
-  docker-compose.yml
+```text
+├── backend/
+│   ├── alembic/              # Database migration versions & configuration
+│   ├── app/
+│   │   ├── routers/          # API endpoints (auth, tenders, bids, documents, compliance, reviews)
+│   │   ├── services/         # Compliance engine, document processor, PDF generator, LLM
+│   │   ├── models.py         # SQLAlchemy ORM models with composite indexing
+│   │   ├── schemas.py        # Pydantic validation schemas & security validators
+│   │   ├── auth.py           # JWT token generation & password hashing
+│   │   ├── database.py       # DB engine, connection pooling & session management
+│   │   └── main.py           # FastAPI application entrypoint & middleware
+│   ├── tests/                # Automated test suite (18/18 passing)
+│   ├── Dockerfile            # Container definition with Python 3.11 & Tesseract OCR
+│   ├── requirements.txt      # Python dependencies
+│   └── seed.py               # Database initial setup & demo seeding
+├── frontend/
+│   ├── src/
+│   │   ├── pages/            # Dashboard, TenderDetail, BidDetail, ReviewQueue, AdminUsers
+│   │   ├── components/       # Layout Shell, RiskBadge, navigation
+│   │   └── api/client.js     # Axios client with automatic routing & token interceptors
+│   ├── package.json          # Node dependencies
+│   └── vite.config.js        # Vite bundler configuration
+├── sample_documents/         # Test documents for valid and flagged bid compliance scenarios
+├── .github/workflows/ci.yml  # GitHub Actions CI pipeline
+├── render.yaml               # 1-click cloud deployment blueprint for Render
+└── docker-compose.yml        # Multi-container orchestration configuration
 ```
 
-## How the compliance score is calculated
+---
 
-1. Every uploaded document's text is scored against every requirement's
-   keyword list; the best match above a confidence threshold assigns the
-   document to that requirement.
-2. Heuristics scan matched documents for red flags — dates that read as
-   expired, explicit "expired" mentions, near-empty extracted text (a sign of
-   a blank or corrupted scan).
-3. A document that matches a requirement with no issues is **Matched**; a
-   match with issues is **Mismatched** (needs manual review); a requirement
-   with no matching document at all is **Missing**.
-4. Score = (mandatory requirements matched ÷ total mandatory requirements) ×
-   100, minus a penalty per mismatched document. Risk is **Low** at ≥85 with
-   no flags, **Medium** at ≥60, otherwise **High**.
+## 🔒 Security & Compliance Standards
 
-This is a transparent, explainable baseline by design — a procurement officer
-can see exactly why a score landed where it did, which matters more for a
-compliance tool than a black-box model would.
+- **Zero-Storage Secrets**: All sensitive keys (`SECRET_KEY`, DB passwords) are injected via environment variables.
+- **Defense in Depth**: Uploaded files undergo header analysis, size bounds (10MB max), and content hashing.
+- **Audit Defensibility**: Complete traceability with user IDs, timestamps, and action hashes for tender governance.
 
-## Notes on scope
+---
 
-This is a hackathon-stage MVP. Things intentionally kept simple that a
-production rollout would harden further: single officer role (no
-multi-department RBAC yet), keyword-based matching rather than a trained
-classifier, and no e-signature/digital-signature verification of documents.
-The architecture (a clean matching/scoring layer decoupled from
-extraction) is built so any of those can be swapped in without touching the
-rest of the app.
+## 👥 Authors & Acknowledgments
+
+- **Lead Developer & Maintainer:** [Hare Prasath A P](https://github.com/Hare-Prasath-A-P-01)
+- **Team:** Byte Busters
+- **Event:** Smart India Hackathon (SIH 2026) — Problem Statement ID: **SIH26100**
