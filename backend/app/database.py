@@ -24,8 +24,11 @@ Base = declarative_base()
 
 
 def ensure_schema():
-    """Add Tier 1 fields to an existing local database."""
+    """Add Tier 1 fields to an existing local database (SQLite legacy migration)."""
+    if not is_sqlite:
+        return
     inspector = inspect(engine)
+    tables = inspector.get_table_names()
     additions = {
         "users": {
             "department": "VARCHAR(255)",
@@ -60,6 +63,8 @@ def ensure_schema():
     }
     with engine.begin() as connection:
         for table, columns in additions.items():
+            if table not in tables:
+                continue
             existing = {column["name"] for column in inspector.get_columns(table)}
             for name, definition in columns.items():
                 if name not in existing:
