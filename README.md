@@ -1,7 +1,7 @@
 # AI Bid Compliance Checker — Byte Busters (SIH 2026)
 
 [![CI](https://github.com/Hare-Prasath-A-P-01/Bid-Compilance/actions/workflows/ci.yml/badge.svg)](https://github.com/Hare-Prasath-A-P-01/Bid-Compilance/actions/workflows/ci.yml)
-[![Render Deployment](https://img.shields.io/badge/Render-Deployed%20Live-brightgreen)](https://bid-compliance-frontend.onrender.com)
+[![Render Deployment](https://img.shields.io/badge/Render-Deployed%20Live-brightgreen)](https://bytebusters-bidcompliance.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
@@ -17,7 +17,7 @@ Built for **Smart India Hackathon 2026** (Problem Statement: **SIH26100**) by **
 
 | Service | Link | Description |
 |---|---|---|
-| **Web Application (UI)** | [https://bid-compliance-frontend.onrender.com](https://bid-compliance-frontend.onrender.com) | Live React dashboard for procurement officers and reviewers |
+| **Web Application (UI)** | [https://bytebusters-bidcompliance.onrender.com](https://bytebusters-bidcompliance.onrender.com) | Live React dashboard for procurement officers and reviewers |
 | **Backend REST API** | [https://bid-compliance-api.onrender.com](https://bid-compliance-api.onrender.com) | FastAPI backend service with OCR & compliance engine |
 | **Interactive API Docs** | [https://bid-compliance-api.onrender.com/docs](https://bid-compliance-api.onrender.com/docs) | Swagger UI for exploring and testing API endpoints |
 
