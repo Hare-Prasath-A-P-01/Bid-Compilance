@@ -19,11 +19,18 @@ class Settings(BaseSettings):
     HSTS_SECONDS: int = 31536000
     MAX_FILE_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB
 
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def fix_database_url(cls, v: str) -> str:
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
     @field_validator("SECRET_KEY")
     @classmethod
     def validate_secret_key(cls, v: str, info) -> str:
-        # In production, secret must be long and distinct from development defaults
         return v
+
 
     class Config:
         env_file = ".env"

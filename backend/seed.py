@@ -2,11 +2,24 @@
 
     python seed.py
 """
+import time
+from sqlalchemy import text
 from app.database import Base, engine, SessionLocal
 from app import models, auth
 
+# Wait for database connection in cloud environments
+for attempt in range(1, 31):
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        break
+    except Exception as e:
+        print(f"Waiting for database to accept connections... attempt {attempt}/30")
+        time.sleep(2)
+
 Base.metadata.create_all(bind=engine)
 db = SessionLocal()
+
 
 if not db.query(models.User).filter(models.User.email == "officer@sih.gov.in").first():
     officer = models.User(

@@ -2,7 +2,11 @@ from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import settings
 
-is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+db_url = settings.DATABASE_URL
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+is_sqlite = db_url.startswith("sqlite")
 connect_args = {"check_same_thread": False} if is_sqlite else {}
 engine_options = {"pool_pre_ping": True}
 if not is_sqlite:
@@ -12,9 +16,10 @@ if not is_sqlite:
         "pool_recycle": 1800,  # recycle stale connections after 30 mins
         "pool_timeout": 30,
     })
-engine = create_engine(settings.DATABASE_URL, connect_args=connect_args, **engine_options)
+engine = create_engine(db_url, connect_args=connect_args, **engine_options)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 
 
