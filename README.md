@@ -17,7 +17,7 @@ Built for **Smart India Hackathon 2026** (Problem Statement: **SIH26100**) by **
 
 | Service | Link | Description |
 |---|---|---|
-| **Web Application (UI)** | [https://bytebusters-bidcompliance.onrender.com](https://bytebusters-bidcompliance.onrender.com) | Live React dashboard for procurement officers and reviewers |
+| **Web Application (UI)** | [https://bid-compliance-frontend.onrender.com](https://bid-compliance-frontend.onrender.com) | Live React dashboard for procurement officers and reviewers |
 | **Backend REST API** | [https://bid-compliance-api.onrender.com](https://bid-compliance-api.onrender.com) | FastAPI backend service with OCR & compliance engine |
 | **Interactive API Docs** | [https://bid-compliance-api.onrender.com/docs](https://bid-compliance-api.onrender.com/docs) | Swagger UI for exploring and testing API endpoints |
 

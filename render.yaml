@@ -32,7 +32,7 @@ services:
 
   # Frontend React / Vite Static Site
   - type: web
-    name: bytebusters-bidcompliance
+    name: bid-compliance-frontend
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
