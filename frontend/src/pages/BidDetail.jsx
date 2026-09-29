@@ -139,34 +139,275 @@ export default function BidDetail() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="advisory-note"><strong>Advisory compliance result</strong><span>Automated evidence supports review; it does not replace the procurement decision.</span></div>
-        <div className="score-row">
-          <div className="score-figure">
-            <div className={`score-number ${riskClass(report.risk_level)}`}>{report.compliance_score}%</div>
-            <div className="score-label">Compliance score</div>
-          </div>
+      {/* ========================================================================= */}
+      {/* FINAL VERIFICATION RESULT SECTION (SIH PRESENTATION READY) */}
+      {/* ========================================================================= */}
+      <section className="verification-result-section" id="final-verification-result">
+        <div className="verification-header">
           <div>
-            <RiskBadge risk={report.risk_level} />
-            <div className="doc-note">Risk is derived from missing, mismatched, and critical requirements.</div>
+            <span className="verification-badge-tag">SIH 2026 Automated Audit Platform</span>
+            <h2 className="verification-title">Final Verification Result</h2>
+            <div className="verification-subtitle">
+              Comprehensive evidence-backed compliance audit for tender evaluation against statutory requirements
+            </div>
           </div>
-          <div className="stat-strip" style={{ marginLeft: 'auto' }}>
-            <div className="stat">
-              <div className="n">{report.matched.length}</div>
-              <div className="l">Matched</div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button className="btn btn-secondary btn-small" onClick={exportCsv}>Export CSV</button>
+            <button className="btn btn-primary" onClick={exportPdf}>
+              📄 Download Report (PDF)
+            </button>
+          </div>
+        </div>
+
+        {/* 9-Stage User Flow Stepper */}
+        <div className="workflow-stepper">
+          <div className="workflow-stepper-title">Verification Workflow Pipeline</div>
+          <div className="stepper-track">
+            <span className="step-node active">1. Upload Bid Document</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">2. Extract Information</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">3. Identify Requirements</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">4. Apply Compliance Rules</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">5. Cross-check Information</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">6. Detect Missing / Mismatch</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">7. Generate Score & Risk</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node active">8. Show Evidence & Reason</span>
+            <span className="step-arrow">→</span>
+            <span className="step-node decision">9. Procurement Officer Review</span>
+          </div>
+        </div>
+
+        {/* 4. COMPLIANCE SUMMARY */}
+        <div className="summary-kpis-grid">
+          <div className="kpi-card score-card">
+            <div className="kpi-label">Overall Compliance</div>
+            <div className={`kpi-val ${riskClass(report.risk_level)}`}>
+              {report.compliance_score ?? 0}%
             </div>
-            <div className="stat">
-              <div className="n">{report.mismatched.length}</div>
-              <div className="l">Flagged</div>
+            <div style={{ marginTop: 6 }}>
+              <RiskBadge risk={report.risk_level} />
             </div>
-            <div className="stat">
-              <div className="n">{report.missing.length}</div>
-              <div className="l">Missing</div>
+            <div className="kpi-sub">Defensible multi-rule evaluation</div>
+          </div>
+
+          <div className="kpi-card">
+            <div className="kpi-label">Total Checks</div>
+            <div className="kpi-val">
+              {report.summary_stats?.total_checks ?? (report.matched.length + report.mismatched.length + report.missing.length)}
+            </div>
+            <div className="kpi-sub">Statutory tender requirements</div>
+          </div>
+
+          <div className="kpi-card pass-card">
+            <div className="kpi-label">Passed (Compliant)</div>
+            <div className="kpi-val pass">
+              {report.summary_stats?.passed ?? report.matched.length}
+            </div>
+            <div className="kpi-sub">Verified & valid documents</div>
+          </div>
+
+          <div className="kpi-card missing-card">
+            <div className="kpi-label">Missing</div>
+            <div className="kpi-val missing">
+              {report.summary_stats?.missing ?? report.missing.length}
+            </div>
+            <div className="kpi-sub">Required files not uploaded</div>
+          </div>
+
+          <div className="kpi-card flagged-card">
+            <div className="kpi-label">Mismatch / Needs Review</div>
+            <div className="kpi-val flagged">
+              {report.summary_stats?.mismatched_needs_review ?? report.mismatched.length}
+            </div>
+            <div className="kpi-sub">Expired, blank or flagged</div>
+          </div>
+        </div>
+
+        {/* 1. DOCUMENT DETAILS & 2. EXTRACTED INFORMATION */}
+        <div style={{ marginTop: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h3 style={{ fontSize: 16, margin: 0 }}>Document Details & Extracted Information</h3>
+            <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
+              Processed: {report.details.length} document{report.details.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          {report.details.length === 0 ? (
+            <div className="empty-state" style={{ padding: 20, marginBottom: 16 }}>
+              No bid documents processed yet. Upload documents below to view extracted fields and verification results.
+            </div>
+          ) : (
+            report.details.map((doc) => (
+              <div className="doc-detail-card" key={doc.id}>
+                <div className="doc-detail-header">
+                  <div className="doc-detail-title">
+                    <span>📄 {doc.original_filename}</span>
+                    <span className="doc-type-pill">Type: {doc.document_type || 'General Bid Document'}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className={`status-chip ${doc.status === 'Matched' ? 'compliant' : 'mismatch'}`}>
+                      {doc.status === 'Matched' ? '✓ Processed & Verified' : '⚠ Flagged / Needs Review'}
+                    </span>
+                    <span className="doc-file" style={{ fontSize: 11 }}>
+                      Method: {doc.extraction_method || 'Text layer'} · Quality: {Math.round((doc.text_quality || 0) * 100)}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Structured Extracted Information */}
+                <div>
+                  <div className="workflow-stepper-title" style={{ marginBottom: 6 }}>
+                    Extracted Information Fields
+                  </div>
+                  {doc.extracted_fields && Object.keys(doc.extracted_fields).length > 0 ? (
+                    <div className="extracted-fields-grid">
+                      {Object.entries(doc.extracted_fields).map(([k, v]) => (
+                        <div className="field-tile" key={k}>
+                          <div className="field-key">{k}</div>
+                          <div className="field-val">{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="doc-note">
+                      {doc.matched_keywords ? `Matched keywords: ${doc.matched_keywords}` : 'Text extracted cleanly without custom fields.'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* 3. COMPLIANCE VERIFICATION TABLE */}
+        <div style={{ marginTop: 24 }}>
+          <h3 style={{ fontSize: 16, margin: '0 0 4px 0' }}>Statutory Compliance Verification Matrix</h3>
+          <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginBottom: 10 }}>
+            Requirement-by-requirement verification status with defensible evidence and extracted values
+          </div>
+
+          <div className="verification-table-wrap">
+            <table className="verification-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '22%' }}>Requirement</th>
+                  <th style={{ width: '25%' }}>Extracted Value</th>
+                  <th style={{ width: '18%' }}>Verification Status</th>
+                  <th style={{ width: '35%' }}>Evidence / Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(report.verification_checklist && report.verification_checklist.length > 0) ? (
+                  report.verification_checklist.map((item) => {
+                    const statusClass = item.status === 'Compliant' ? 'compliant'
+                      : item.status === 'Missing' ? 'missing'
+                      : item.status === 'Mismatch' ? 'mismatch'
+                      : 'review'
+
+                    return (
+                      <tr key={item.requirement_id}>
+                        <td>
+                          <div className="req-name-box">
+                            <span className="req-name-text">{item.requirement_name}</span>
+                            {item.mandatory && <span className="req-mandatory-tag">Mandatory</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: 12.5, fontWeight: 500, color: '#0f172a' }}>
+                            {item.extracted_value || 'Not Submitted'}
+                          </div>
+                          {item.matched_document && (
+                            <div className="doc-file" style={{ marginTop: 2, fontSize: 11 }}>
+                              Source: {item.matched_document}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <span className={`status-chip ${statusClass}`}>
+                            {item.status_label || item.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="reason-box">
+                            <span className={item.status !== 'Compliant' ? 'reason-flag-text' : ''}>
+                              {item.reason}
+                            </span>
+                            {item.evidence && item.evidence !== '—' && (
+                              <div className="doc-file" style={{ marginTop: 3, fontSize: 11 }}>
+                                Keywords detected: {item.evidence}
+                              </div>
+                            )}
+                            <div className="portal-status-note">
+                              Verification Check: {item.portal_verification || 'API integration ready (Demo mode)'}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                ) : (
+                  [...report.matched.map((n) => ({ n, s: 'Compliant', l: '✓ Compliant', r: 'Statutory keywords matched and valid format confirmed.' })),
+                   ...report.mismatched.map((n) => ({ n, s: 'Mismatch', l: '✕ Mismatch', r: 'Document flagged during automated inspection.' })),
+                   ...report.missing.map((n) => ({ n, s: 'Missing', l: '✕ Missing', r: 'Required document not submitted by bidder.' }))
+                  ].map((row, idx) => (
+                    <tr key={idx}>
+                      <td><div className="req-name-text">{row.n}</div></td>
+                      <td>—</td>
+                      <td>
+                        <span className={`status-chip ${row.s.toLowerCase()}`}>{row.l}</span>
+                      </td>
+                      <td><div className="reason-box">{row.r}</div></td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 5. EVIDENCE-BASED RESULT (WHY FLAGGED) */}
+        {(() => {
+          const flagged = (report.verification_checklist || []).filter(
+            (item) => item.status === 'Mismatch' || item.status === 'Missing' || item.status === 'Needs Review'
+          )
+          if (flagged.length === 0) return null
+          return (
+            <div className="flagged-findings-box">
+              <div className="flagged-findings-title">
+                <span>⚠️ Evidence-Based Flagged Findings ({flagged.length} item{flagged.length === 1 ? '' : 's'} require review)</span>
+              </div>
+              <ul className="flagged-list">
+                {flagged.map((item) => (
+                  <li key={item.requirement_id}>
+                    <strong>{item.requirement_name} ({item.status}):</strong> {item.reason}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })()}
+
+        {/* 6. FINAL REVIEW MESSAGE */}
+        <div className="review-mandate-banner">
+          <div className="mandate-icon">⚖️</div>
+          <div>
+            <div className="mandate-text-title">
+              "AI-generated verification result. Final qualification/disqualification decision remains with the Procurement Officer."
+            </div>
+            <div className="mandate-text-desc">
+              In accordance with Public Procurement Rules (GFR 2017), this automated evaluation serves as objective decision support. The final determination and award concurrence must be completed by the authorized Procurement Officer.
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
+      {/* ---------- Document Upload Section ---------- */}
       <div className="panel">
         <div className="panel-title"><span>Upload bid documents</span></div>
         <div
@@ -189,29 +430,16 @@ export default function BidDetail() {
         {uploadError && <div className="login-error" style={{ marginTop: 10 }}>{uploadError}</div>}
       </div>
 
-      <div className="panel">
-        <div className="panel-title"><span>Requirement checklist</span></div>
-        {report.missing.length === 0 && report.mismatched.length === 0 && report.matched.length === 0 && (
-          <div className="empty-state">This tender has no defined requirements.</div>
-        )}
-        {[...report.matched.map((n) => ({ n, s: 'Matched' })),
-          ...report.mismatched.map((n) => ({ n, s: 'Mismatched' })),
-          ...report.missing.map((n) => ({ n, s: 'Missing' }))].map((row, i) => (
-          <div className="doc-list-item" key={i}>
-            <div className="doc-name">{row.n}</div>
-            <StatusBadge status={row.s} />
-          </div>
-        ))}
-      </div>
-
+      {/* ---------- Uploaded Documents & Review Operations ---------- */}
       <div className="panel">
         <div className="panel-title">
-          <span>Uploaded documents</span>
+          <span>Uploaded documents & Reviewer Decisions</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-secondary btn-small" onClick={exportCsv}>Export CSV</button>
             <button className="btn btn-primary btn-small" onClick={exportPdf}>Download PDF Certificate</button>
           </div>
         </div>
+
         {report.details.length === 0 ? (
           <div className="empty-state">No documents uploaded yet.</div>
         ) : (

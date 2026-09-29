@@ -127,6 +127,61 @@ class ComplianceEngineTests(unittest.TestCase):
         self.assertEqual(score, 60.0)
         self.assertEqual(risk, models.RiskLevel.high.value)
 
+    def test_extract_structured_fields_and_classification(self):
+        from app.services.compliance_engine import classify_document_type, extract_structured_fields
+
+        gst_text = (
+            "GOVERNMENT OF INDIA\n"
+            "GOODS AND SERVICES TAX REGISTRATION CERTIFICATE\n"
+            "Registration Number (GSTIN): 27ABCDE1234F1Z5\n"
+            "Legal Name: Acme Tech Solutions Pvt Ltd\n"
+            "Trade Name: Acme Technologies\n"
+            "Period of Validity: From 01/04/2022 to 31/12/2029\n"
+        )
+        doc_type = classify_document_type(gst_text, "GST_Certificate.txt", "GST Registration Certificate")
+        self.assertEqual(doc_type, "GST Registration Certificate")
+
+        fields = extract_structured_fields(gst_text, "GST_Certificate.txt", doc_type)
+        self.assertEqual(fields.get("GSTIN"), "27ABCDE1234F1Z5")
+        self.assertEqual(fields.get("Entity Name"), "Acme Tech Solutions Pvt Ltd")
+        self.assertIn("API integration ready", fields.get("Statutory Portal Check", ""))
+
+    def test_build_verification_details_checklist_and_stats(self):
+        from app.services.compliance_engine import build_verification_details
+
+        requirements = [
+            models.Requirement(id=1, name="GST Registration Certificate", keywords="gst", mandatory=True),
+            models.Requirement(id=2, name="PAN Card", keywords="pan", mandatory=True),
+        ]
+        bid = models.Bid(
+            id=10,
+            tender_id=1,
+            bidder_name="SIH Bidder",
+            compliance_score=90.0,
+            risk_level=models.RiskLevel.low,
+            documents=[
+                models.BidDocument(
+                    id=1,
+                    requirement_id=1,
+                    original_filename="GST_Doc.txt",
+                    extracted_text="GSTIN 27ABCDE1234F1Z5 Legal Name: Acme Tech",
+                    status=models.DocumentStatus.matched,
+                    match_confidence=0.95,
+                    matched_keywords="gst, gstin",
+                )
+            ],
+        )
+        checklist, stats = build_verification_details(bid, requirements)
+
+        self.assertEqual(stats["total_checks"], 2)
+        self.assertEqual(stats["passed"], 1)
+        self.assertEqual(stats["missing"], 1)
+        self.assertEqual(checklist[0]["status"], "Compliant")
+        self.assertEqual(checklist[0]["status_label"], "✓ Compliant")
+        self.assertEqual(checklist[1]["status"], "Missing")
+        self.assertEqual(checklist[1]["status_label"], "✕ Missing")
+
 
 if __name__ == "__main__":
     unittest.main()
+

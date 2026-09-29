@@ -153,38 +153,89 @@ def generate_compliance_pdf(bid: models.Bid, tender: models.Tender) -> io.BytesI
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
     story.append(meta_table)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
-    # 3. Document Compliance Matrix
-    story.append(Paragraph("<b>DOCUMENT VERIFICATION & EVIDENCE BREAKDOWN</b>", ParagraphStyle("TableHeadTitle", fontName="Helvetica-Bold", fontSize=9, textColor=colors.HexColor("#1e293b"))))
+    # 3. Compliance Summary KPIs
+    from app.services import compliance_engine
+    requirements = tender.requirements
+    checklist, stats = compliance_engine.build_verification_details(bid, requirements)
+
+    kpi_data = [
+        [
+            Paragraph(f"<b>Total Checks:</b> {stats['total_checks']}", cell_bold),
+            Paragraph(f"<b>Passed (Compliant):</b> <font color='#166534'>{stats['passed']}</font>", cell_bold),
+            Paragraph(f"<b>Missing:</b> <font color='#991b1b'>{stats['missing']}</font>", cell_bold),
+            Paragraph(f"<b>Flagged / Needs Review:</b> <font color='#b45309'>{stats['mismatched_needs_review']}</font>", cell_bold),
+        ]
+    ]
+    kpi_table = Table(kpi_data, colWidths=[135, 135, 135, 135])
+    kpi_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f1f5f9")),
+        ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+    ]))
+    story.append(kpi_table)
+    story.append(Spacer(1, 10))
+
+    # 4. Official Review Mandate Notice
+    mandate_style = ParagraphStyle(
+        "MandateNotice",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.HexColor("#1e3a8a"),
+        alignment=1,
+    )
+    mandate_box = Table(
+        [[Paragraph("<b>MANDATORY EVALUATION NOTICE:</b> AI-generated verification result. Final qualification/disqualification decision remains with the Procurement Officer.", mandate_style)]],
+        colWidths=[540]
+    )
+    mandate_box.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#eff6ff")),
+        ("BOX", (0, 0), (-1, -1), 1, colors.HexColor("#3b82f6")),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    story.append(mandate_box)
+    story.append(Spacer(1, 12))
+
+    # 5. Requirement Verification & Evidence Matrix
+    story.append(Paragraph("<b>STATUTORY REQUIREMENT VERIFICATION BREAKDOWN</b>", ParagraphStyle("TableHeadTitle", fontName="Helvetica-Bold", fontSize=9, textColor=colors.HexColor("#1e293b"))))
     story.append(Spacer(1, 4))
 
     table_rows = [
         [
-            Paragraph("Document / File", cell_bold),
-            Paragraph("Matched Requirement", cell_bold),
+            Paragraph("Requirement", cell_bold),
+            Paragraph("Extracted Value", cell_bold),
             Paragraph("Status", cell_bold),
-            Paragraph("Keywords Evidence", cell_bold),
-            Paragraph("Review Comment", cell_bold),
+            Paragraph("Evidence & Reason", cell_bold),
         ]
     ]
 
-    for d in bid.documents:
-        status_str = d.status.value if hasattr(d.status, "value") else str(d.status)
-        req_name = d.requirement.name if d.requirement else "Unmatched Requirement"
-        evidence_str = d.matched_keywords or "—"
-        comment_str = d.review_comment or d.notes or "Pending officer sign-off"
+    for item in checklist:
+        st = item["status"]
+        if st == "Compliant":
+            st_color = "#166534"
+        elif st == "Missing":
+            st_color = "#991b1b"
+        elif st == "Mismatch":
+            st_color = "#dc2626"
+        else:
+            st_color = "#d97706"
 
-        table_rows.append([
-            Paragraph(f"<b>{d.original_filename}</b><br/><font size=6.5 color='#64748b'>{d.extraction_method or 'auto'} · q:{int((d.text_quality or 0)*100)}%</font>", cell_style),
-            Paragraph(req_name, cell_style),
-            Paragraph(status_str, cell_bold),
-            Paragraph(evidence_str, cell_style),
-            Paragraph(comment_str, cell_style),
-        ])
+        status_p = Paragraph(f"<font color='{st_color}'><b>{item['status_label']}</b></font>", cell_bold)
+        req_p = Paragraph(f"<b>{item['requirement_name']}</b>" + (" <font size=6.5 color='#dc2626'>[Mandatory]</font>" if item['mandatory'] else ""), cell_style)
+        val_p = Paragraph(item.get("extracted_value") or "—", cell_style)
+        reason_p = Paragraph(f"{item['reason']}<br/><font size=6 color='#64748b'>Verification: {item.get('portal_verification', '')}</font>", cell_style)
 
-    doc_table = Table(table_rows, colWidths=[120, 110, 70, 110, 130])
-    doc_table.setStyle(TableStyle([
+        table_rows.append([req_p, val_p, status_p, reason_p])
+
+    req_table = Table(table_rows, colWidths=[140, 140, 90, 170])
+    req_table.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e2e8f0")),
         ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#94a3b8")),
         ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#cbd5e1")),
@@ -192,10 +243,10 @@ def generate_compliance_pdf(bid: models.Bid, tender: models.Tender) -> io.BytesI
         ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
     ]))
-    story.append(doc_table)
-    story.append(Spacer(1, 20))
+    story.append(req_table)
+    story.append(Spacer(1, 16))
 
-    # 4. Certification & Sign-off Block
+    # 6. Certification & Sign-off Block
     sign_block = [
         [
             Paragraph("<b>EVALUATED BY:</b><br/><br/>___________________________<br/>Procurement Evaluation Committee", cell_style),
@@ -208,9 +259,9 @@ def generate_compliance_pdf(bid: models.Bid, tender: models.Tender) -> io.BytesI
         ("TOPPADDING", (0, 0), (-1, -1), 6),
     ]))
     story.append(KeepTogether(sign_table))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 12))
 
-    # 5. Footer disclaimer
+    # 7. Footer disclaimer
     disclaimer = (
         "Notice: This document is an automated compliance audit certificate generated by the Byte Busters "
         "AI Bid Compliance Engine. Final procurement decisions are subject to statutory verification under "
@@ -221,3 +272,4 @@ def generate_compliance_pdf(bid: models.Bid, tender: models.Tender) -> io.BytesI
     doc.build(story)
     buffer.seek(0)
     return buffer
+

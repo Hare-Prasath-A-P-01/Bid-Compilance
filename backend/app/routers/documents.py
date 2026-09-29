@@ -139,7 +139,12 @@ def upload_document(
 
     db.commit()
     db.refresh(doc)
-    return doc
+    doc_dict = schemas.BidDocumentOut.model_validate(doc).model_dump()
+    req_name = matched_req.name if matched_req else None
+    doc_dict["document_type"] = compliance_engine.classify_document_type(text, filename, req_name)
+    doc_dict["extracted_fields"] = compliance_engine.extract_structured_fields(text, filename, req_name)
+    return schemas.BidDocumentOut(**doc_dict)
+
 
 
 @router.patch("/{document_id}/review", response_model=schemas.BidDocumentOut)

@@ -191,6 +191,8 @@ class BidDocumentOut(BaseModel):
     assigned_reviewer_id: Optional[int]
     review_due_at: Optional[datetime.datetime]
     uploaded_at: datetime.datetime
+    document_type: Optional[str] = None
+    extracted_fields: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -223,6 +225,31 @@ class ReviewAssignment(BaseModel):
     due_at: Optional[datetime.datetime] = None
 
 
+class RequirementVerificationItem(BaseModel):
+    requirement_id: int
+    requirement_name: str
+    mandatory: bool = True
+    critical: bool = False
+    weight: float = 1.0
+    status: str  # "Compliant", "Needs Review", "Missing", "Mismatch"
+    status_label: str  # "✓ Compliant", "⚠ Needs Review", "✕ Missing", "✕ Mismatch"
+    extracted_value: Optional[str] = None
+    matched_document: Optional[str] = None
+    evidence: Optional[str] = None
+    reason: str
+    confidence: Optional[float] = None
+    portal_verification: Optional[str] = "API integration ready (Demo mode)"
+
+
+class ComplianceSummaryStats(BaseModel):
+    total_checks: int
+    passed: int
+    missing: int
+    mismatched_needs_review: int
+    compliance_score: float
+    risk_level: str
+
+
 class ComplianceReport(BaseModel):
     bid_id: int
     bidder_name: str
@@ -235,6 +262,12 @@ class ComplianceReport(BaseModel):
     mismatched: List[str]
     missing: List[str]
     details: List[BidDocumentOut]
+    verification_checklist: Optional[List[RequirementVerificationItem]] = None
+    summary_stats: Optional[ComplianceSummaryStats] = None
+    review_mandate_notice: Optional[str] = (
+        "AI-generated verification result. Final qualification/disqualification decision remains with the Procurement Officer."
+    )
+
 
 
 class AuditLogOut(BaseModel):
